@@ -1,7 +1,7 @@
 <?php
 
-define('ROOT_URL', 'http://localhost/phpmyadmin/');
-define('ROOT_HOST', 'localhost');
-define('ROOT_USER', 'root');
-define('ROOT_PASS', '');
-define('ROOT_NAME', 'recordapp_db');
+define('ROOT_URL', 'http://localhost/recordsapp/');
+define('DB_HOST', 'localhost');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+define('DB_NAME', 'recordapp_db');
