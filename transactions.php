@@ -24,10 +24,33 @@
     require ('config/config.php');
     require ('config/db.php');
 
+    //Define the total number of results you want per page
+    $results_per_page = 10;
+
+    //find the total number of results/rows istored in tht database
+    $query = "SELECT * FROM transaction";
+    $result = mysqli_query($conn, $query);
+    $number_of_result = mysqli_num_rows($result);
+
+    //determine the total number of pages available
+    $number_of_page = ceil($number_of_result / $results_per_page);
+
+    //determine which page visitor is currently on
+    if(!isset($_GET['page'])){
+        $page = 1;
+    }else{
+        $page = $_GET['page'];
+    }
+
+    //determine the sql LIMIT starting number for the results on the display page
+    $page_first_result = ($page-1) * $results_per_page;
+
+
     //Create Query
-    $query = 'SELECT transaction.datelog, transaction.documentcode, transaction.action, office.name as office_name,
-    CONCAT(employee.lastname, ",", employee.firstname) as employee_fullname FROM employee, office, transaction
-    WHERE transaction.employee_id=employee.id and transaction.office_id = office.id';
+    $query = 'SELECT transaction.datelog, transaction.documentcode, transaction.action, transaction.remarks, office.name as office_name, 
+    CONCAT(employee.lastname, ",", employee.firstname) as employee_fullname FROM recordapp_db.employee, recordapp_db.office, 
+    recordapp_db.transaction WHERE transaction.employee_id=employee.id and transaction.office_id = office.id  
+    ORDER BY transaction.documentcode, transaction.datelog LIMIT '. $page_first_result . ',' . $results_per_page;
 
     //Get the result
     $result = mysqli_query($conn, $query);
@@ -44,9 +67,10 @@
     <div class="wrapper">
         <div class="sidebar" data-image="../assets/img/sidebar-5.jpg">
             <div class="sidebar-wrapper">
-                <?php include ('includes/sidebar.php'); ?>
-            
+                <?php include ('includes/sidebar.php'); ?> 
         </div>
+    
+
         <div class="main-panel">
         <?php include ('includes/navbar.php'); ?>
             <div class="content">
@@ -84,6 +108,7 @@
                                                     <td> <?php echo $transaction['action']; ?></td>
                                                     <td> <?php echo $transaction['office_name']; ?></td>
                                                     <td> <?php echo $transaction['employee_fullname']; ?></td>
+                                                    <td> <?php echo $transaction['remarks']; ?></td>
                                                 </tr>
                                                 <?php endforeach ?>
                                             </tbody>
@@ -92,6 +117,11 @@
                                 </div>
                             </div>
                         </div>
+                        <?php
+                            for($page=1; $page <= $number_of_page; $page++){
+                                echo '<a href="transaction.php?page=' . $page . '">' . $page . '</a>';
+                            }
+                        ?>
                     </div>
             </div>
             <footer class="footer">
