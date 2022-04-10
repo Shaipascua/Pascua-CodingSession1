@@ -19,61 +19,63 @@
 </head>
 
 <body>
+<?php
+    require('config/config.php');
+    require('config/db.php');
 
-<?php 
-    require ('config/config.php');
-    require ('config/db.php');
-
-    //Gets the value sent over the search form
+    // Gets the value sent over search form
     $search = isset($_GET['search']) ? $_GET['search'] : null;
 
-    //Define the total number of results you want per page
+    // Define the total number of results you want per page
     $results_per_page = 10;
 
-    //find the total number of results/rows istored in tht database
+    // Find the total number of results/rows storedc in the database
     $query = "SELECT * FROM transaction";
     $result = mysqli_query($conn, $query);
     $number_of_result = mysqli_num_rows($result);
 
-    //determine the total number of pages available
+    // Determine the total number of pages availble
     $number_of_page = ceil($number_of_result / $results_per_page);
 
-    //determine which page visitor is currently on
+    // Determine which page number visitor is currently on
     if(!isset($_GET['page'])){
         $page = 1;
+
     }else{
         $page = $_GET['page'];
     }
 
-    //determine the sql LIMIT starting number for the results on the display page
+    // Determine the sql LIMIT starting number for the results on the display page
     $page_first_result = ($page-1) * $results_per_page;
 
 
     //Create Query
-    if(strlen($search) > 0){
-        $query = 'SELECT transaction.datelog, transaction.documentcode, transaction.action, transaction.remarks, office.name as office_name, 
-        CONCAT(employee.lastname, ",", employee.firstname) as employee_fullname FROM recordapp_db.employee, recordapp_db.office, 
-        recordapp_db.transaction WHERE transaction.employee_id=employee.id and transaction.office_id = office.id  and transaction.documentcode =' . $search .'
-        ORDER BY transaction.documentcode, transaction.datelog
+    if(strlen($search > 0)){
+
+        $query = 'SELECT transaction.id, transaction.datelog, transaction.documentcode, transaction.action, transaction.remarks, office.name as office_name, 
+        CONCAT(employee.lastname, ",", employee.firstname) as employee_fullname FROM recordsapp_db.employee, recordsapp_db.office, 
+        recordsapp_db.transaction WHERE transaction.employee_id=employee.id and transaction.office_id = office.id 
+        AND transaction.documentcode='.$search.' ORDER BY transaction.documentcode, transaction.datelog 
         LIMIT '. $page_first_result . ',' . $results_per_page;
+   
     }else{
-        $query = 'SELECT transaction.datelog, transaction.documentcode, transaction.action, transaction.remarks, office.name as office_name, 
+
+        $query = 'SELECT transaction.id, transaction.datelog, transaction.documentcode, transaction.action, transaction.remarks, office.name as office_name, 
         CONCAT(employee.lastname, ",", employee.firstname) as employee_fullname FROM recordapp_db.employee, recordapp_db.office, 
         recordapp_db.transaction WHERE transaction.employee_id=employee.id and transaction.office_id = office.id  
         ORDER BY transaction.documentcode, transaction.datelog LIMIT '. $page_first_result . ',' . $results_per_page;
-    }
-    
 
-    //Get the result
+    }
+    // Get the result
     $result = mysqli_query($conn, $query);
 
-    //Fetch the data
+    // Fetch the data
     $transactions = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
-    //Free result
+    // Free result
     mysqli_free_result($result);
 
-    //Close the connection
+    // Close the connection
     mysqli_close($conn);
 ?>
     <div class="wrapper">
@@ -117,18 +119,24 @@
                                                 <th>Office</th>
                                                 <th>Employee</th>
                                                 <th>Remarks</th>
+                                                <th>Action</th>
                                             </thead>
                                             <tbody>
-                                                <?php foreach($transactions as $transaction) : ?>
+                                            <?php foreach($transactions as $transaction) : ?>
                                                 <tr>
-                                                    <td> <?php echo $transaction['datelog']; ?></td>
-                                                    <td> <?php echo $transaction['documentcode']; ?></td>
-                                                    <td> <?php echo $transaction['action']; ?></td>
-                                                    <td> <?php echo $transaction['office_name']; ?></td>
-                                                    <td> <?php echo $transaction['employee_fullname']; ?></td>
-                                                    <td> <?php echo $transaction['remarks']; ?></td>
+                                                    <td><?php echo $transaction['datelog']; ?></td>
+                                                    <td><?php echo $transaction['documentcode']; ?></td>
+                                                    <td><?php echo $transaction['action']; ?></td>
+                                                    <td><?php echo $transaction['office_name']; ?></td>
+                                                    <td><?php echo $transaction['employee_fullname']; ?></td>
+                                                    <td><?php echo $transaction['remarks']; ?></td>
+                                                    <td>
+                                                        <a href="/transaction-edit.php?id=<?php echo $transaction['id']; ?>"> 
+                                                            <button type="submit" class="btn btn-warning btn-fill pull-right">Edit</button>
+                                                        </a>
+                                                    </td>
                                                 </tr>
-                                                <?php endforeach ?>
+                                            <?php endforeach ?>
                                             </tbody>
                                         </table>
                                     </div>
